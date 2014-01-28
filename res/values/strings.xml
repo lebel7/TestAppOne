@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+
+    <string name="app_name">TestAppOne</string>
+    <string name="action_settings">Settings</string>
+    <string name="action_scan">Scan</string>
+    <string name="action_exit">Exit Application</string>
+    <string name="maindescription">Main Objectives: \n\n The application should simply scan the barcode of a product and return some basic information about it from the sybase database (Proper.db).\n\n</string>
+    <string name="maintitle">Main Tasks</string>
+    <string name="barcode_name">Barcode Scan</string>
+    <string name="but_start">Start Scan</string>
+    <string name="but_stop">Stop Scan</string>
+    <string name="but_close">Close</string>
+    <string name="title_activity_act_details">Details</string>
+    <string name="hello_world">Hello world!</string>
+    <string name="img_detail_left">logo</string>
+    <string name="img_detail_center">logo</string>
+    <string name="img_detail_right">logo</string>
+    <string name="img_album">Album Art</string>
+    <string name="defaultLabelText">Empty TextView</string>
+    <string name="defaultLabelTextLorem">Lorem ipsum dolor sit amet, consectetur adipisicing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.</string>
+    <string name="image_description">shows image of the barcode</string>
+    
+    <string name="DEV_OPEN_ERR">Device open failed！Software will quit！</string>
+    <string name="DIA_ALERT">Warning！</string>
+    <string name="DIA_CHECK">Confirm</string>
+
+</resources>
