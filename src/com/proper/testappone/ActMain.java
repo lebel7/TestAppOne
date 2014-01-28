@@ -576,8 +576,8 @@ public class ActMain extends Activity {
     			
     			// *****************************************	BEGIN	tryDownloadingData	**********************************************************
     			//String serviceUrl = "http://pmdtestserver:9080/com.lebel.restsample/api/v1/product";
-    			//String serviceUrl = "http://192.168.10.248:9080/com.lebel.restsample/api/v1/product";
-    			String serviceUrl = "http://192.168.0.104:8080/com.lebel.restsample/api/v1/product";
+    			String serviceUrl = "http://192.168.10.248:9080/com.lebel.restsample/api/v1/product";
+    			//String serviceUrl = "http://192.168.0.104:8080/com.lebel.restsample/api/v1/product";
     			final String thisLogTag = "tryDownloadingData";
     			
     			switch (thisAction) {
