@@ -4,7 +4,7 @@ import java.io.IOException;
 import java.io.StringReader;
 import java.io.StringWriter;
 import java.io.UnsupportedEncodingException;
-import java.lang.ref.WeakReference;
+//import java.lang.ref.WeakReference;
 import java.net.URL;
 import java.net.URLConnection;
 import java.util.ArrayList;
@@ -34,6 +34,7 @@ import org.xmlpull.v1.XmlPullParserFactory;
 
 import com.android.barcode.DeviceControl;
 import com.android.barcode.SerialPort;
+//import com.android.barcode.BarcodeDemoActivity.MyTask;
 import com.proper.testappone.data.Product;
 
 import android.media.AudioManager;
@@ -45,6 +46,7 @@ import android.os.Message;
 import android.app.Activity;
 import android.app.AlertDialog;
 import android.app.ProgressDialog;
+//import android.content.Context;
 import android.content.DialogInterface;
 import android.content.Intent;
 import android.util.Log;
@@ -52,6 +54,8 @@ import android.view.KeyEvent;
 import android.view.Menu;
 import android.view.View;
 import android.widget.Button;
+//import android.widget.EditText;
+import android.widget.TextView;
 import android.widget.Toast;
 
 public class ActMain extends Activity {
@@ -72,7 +76,7 @@ public class ActMain extends Activity {
 	private ReadThread mReadThread;
 	private Button close;
 	private static Button scan;
-	private static String staticScannerInput = "";
+	private TextView mReception;
 	private static final String TAG = "SerialPort";
 	private static boolean key_start = true;
 	private static boolean Powered = false;
@@ -81,12 +85,11 @@ public class ActMain extends Activity {
 	private static Timer retrig_timer = new Timer();
 	private static SoundPool soundPool;
 	private static	int soundId;
-	private MyHandler handler = new MyHandler();
-	private THandler t_handler = new THandler(this);
-	private NHandler n_handler = new NHandler();
+	private Handler handler = null;
+	private Handler t_handler = null;
+	private Handler n_handler = null;
 	private boolean ops = false;
 	private boolean scanSuccess = false;
-	private static MyTask mTask;
 	private String scannerInput;
 	
 	public String getScannerInput() {
@@ -122,6 +125,7 @@ public class ActMain extends Activity {
         close.setOnClickListener(new ClickEvent()); 
         scan = (Button) this.findViewById(R.id.btnScan);
         scan.setOnClickListener(new ClickEvent());
+        mReception = (TextView) this.findViewById(R.id.etxtScanInput);  
         
         try {
         	DevCtrl = new DeviceControl("/proc/driver/scan");
@@ -144,10 +148,66 @@ public class ActMain extends Activity {
 
         soundPool = new SoundPool(1, AudioManager.STREAM_MUSIC, 0);
         soundId = soundPool.load("/system/media/audio/ui/VideoRecord.ogg", 0);
+        
+        //****************************************************************************************************************************
+        t_handler = new Handler() {
+        	@Override
+        	public void handleMessage(Message msg) {
+        		super.handleMessage(msg);
+        		if(msg.what == 1) {
+        			try {
+        				DevCtrl.PowerOffDevice();
+        			} catch (IOException e) {
+        				Log.d(TAG, "BBB");
+						// TODO Auto-generated catch block
+        				e.printStackTrace();
+        			}//powersave
+        			Powered = false;
+        		}
+        	}
+        };
+        
+        n_handler = new Handler() {
+        	@Override
+        	public void handleMessage(Message msg) {
+        		super.handleMessage(msg);
+        		if(msg.what == 1) {
+            	try {
+            			if(key_start == false)
+            			{
+            				DevCtrl.TriggerOffDevice();
+            				timer = new Timer();				//start a timer, when machine is idle for some time, cut off power to save energy.
+            				timer.schedule(new MyTask(), 60000);
+            				scan.setEnabled(true);
+            				key_start = true;
+            			}
+					} catch (IOException e) {
+						// TODO Auto-generated catch block
+						e.printStackTrace();
+					}
+        		}
+        	}
+        };
+        
+		handler = new Handler() {
+			 
+	            @Override
+	            public void handleMessage(Message msg) {
+	                super.handleMessage(msg);
+	                if(msg.what == 1 && key_start == false){
+	                    mReception.append(buff);
+	                    soundPool.play(soundId, 1, 1, 0, 0, 1);
+            			key_start = true;
+           				scan.setEnabled(true);
+           				retrig_timer.cancel();
+	                }
+	            }
+	    };
+	    //**********************************************************************************************************************************************
 	    
 	}
 
-	private static class THandler extends Handler {
+	/*private static class THandler extends Handler {
 		//Handler t_handler = new Handler() {
 			private final WeakReference<ActMain> mActivity;
 
@@ -175,29 +235,49 @@ public class ActMain extends Activity {
 	    }
 	    
 	private static class NHandler extends Handler {
-	    //n_handler = new Handler() {
-			//private final WeakReference<ActMain> mActivity;
-			MyTask nTask = mTask;
-
-	    	@Override
-	    	public void handleMessage(Message msg) {
-	    		super.handleMessage(msg);
-	    		if(msg.what == 1) {
-	        	try {
-	        			if(key_start == false)
-	        			{
-	        				DevCtrl.TriggerOffDevice();
-	        				timer = new Timer();				//start a timer, when machine is idle for some time, cut off power to save energy.
-	        				timer.schedule(nTask, 60000);
-	        				scan.setEnabled(true);
-	        				key_start = true;
-	        			}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-	    		}
-	    	}
+		//n_handler = new Handler() {
+		//private final WeakReference<ActMain> mActivity;
+		//MyTask nTask = mTask;
+		private ActMain thisActivity;
+		public NHandler(ActMain passedActivity) {
+			super();
+			thisActivity = passedActivity;
+		}
+		
+		class MyTask extends TimerTask
+	    {
+			//public MyTask() {
+			//}
+			@Override
+			public void run() {
+				
+				Message message = new Message();
+				message.what = 1;
+				thisActivity.t_handler.sendMessage(message);
+				//ActMain.this.t_handler.sendMessage(message);
+			}
 	    }
+
+    	@Override
+    	public void handleMessage(Message msg) {
+    		super.handleMessage(msg);
+    		if(msg.what == 1) {
+        	try {
+        			if(key_start == false)
+        			{
+        				DevCtrl.TriggerOffDevice();
+        				timer = new Timer();				//start a timer, when machine is idle for some time, cut off power to save energy.
+        				//timer.schedule(nTask, 60000);
+        				timer.schedule(new MyTask(), 60000);
+        				scan.setEnabled(true);
+        				key_start = true;
+        			}
+				} catch (IOException e) {
+					e.printStackTrace();
+				}
+    		}
+    	}
+    }
 	    
 	private static class MyHandler extends Handler {
 		//handler = new Handler() {
@@ -216,7 +296,7 @@ public class ActMain extends Activity {
 	       				retrig_timer.cancel();
 	                }
 	            }
-	    }
+	    }*/
 		
 	@Override
 	public boolean onCreateOptionsMenu(Menu menu) {
@@ -225,10 +305,10 @@ public class ActMain extends Activity {
 		return true;
 	}
 	
-	public class MyTask extends TimerTask
+	class MyTask extends TimerTask
     {
-		public MyTask() {
-		}
+		//public MyTask() {
+		//}
 		@Override
 		public void run() {
 			
@@ -383,7 +463,8 @@ public class ActMain extends Activity {
 							prodCount = prodCount + 1;
 			            	prodCount = prodCount - 1;
 			            	
-			            	if (!getProductList().isEmpty()) {
+			            	//if (!getProductList().isEmpty()) {
+			            	if (productList != null && !productList.isEmpty()) {
 			            		Intent i = new Intent(ActMain.this, ActDetails.class);
 								i.putExtra("SCANDATA_EXTRA", buff);
 								i.putExtra("ACTION_EXTRA", ACTION_GETSINGLEPRODUCT);
@@ -393,6 +474,10 @@ public class ActMain extends Activity {
 							else {
 								Toast.makeText(ActMain.this, "The product scanned does not exist in our database", Toast.LENGTH_LONG).show();
 							}
+			            	
+			            	if (mReception.getText().toString().trim().length() > 0) {
+			            		prodCount = prodCount + 1;
+			            	}
 	            		}
 					} catch (IOException e) {
 						Log.i("Scan ClickEvent", "IOException - getPorductByBarcode threw this madness");
@@ -408,6 +493,10 @@ public class ActMain extends Activity {
 					Log.d("Button Click event", "Something went terribly wrong here! Android couldn't determine which buttion was clicked, Uhnmm?!?");
 					break;
 			}
+			if (mReception.getText().toString().trim().length() > 0) {
+        		int prodcount = 0;
+				prodcount = prodcount + 1;
+        	}
         }  
     }
     
@@ -523,10 +612,12 @@ public class ActMain extends Activity {
 				try {
 					Log.d(TAG,"read");
 					buff = mSerialPort.ReadSerial(fd, 1024);
+					setScannerInput(mSerialPort.ReadSerial(fd, 1024));
+					
 					Log.d(TAG,"end");
 					if(buff != null){
 						scanSuccess = true;
-						setScannerInput(buff);  //	*********  Set value		*******
+						//setScannerInput(mSerialPort.ReadSerial(fd, 1024));  //	*********  Set value		*******
 						Message msg = new Message();
                         msg.what = 1;
                         handler.sendMessage(msg);

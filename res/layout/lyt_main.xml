@@ -49,6 +49,21 @@
             android:textSize="14sp"
             android:textStyle="bold" />
 
+        <EditText
+            android:id="@+id/etxtScanInput"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="20dp"
+            android:ems="13"
+            android:inputType="textMultiLine"
+            android:singleLine="true"
+            android:maxLines="1"
+            android:textColor="#ffffff"
+            android:background="@null" >
+
+            <requestFocus />
+        </EditText>
+
         </LinearLayout>
 
 </ScrollView>

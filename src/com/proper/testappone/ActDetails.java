@@ -5,6 +5,7 @@ import com.proper.testappone.data.Product;
 
 import android.os.Bundle;
 import android.app.Activity;
+import android.content.Intent;
 import android.view.Menu;
 import android.widget.TextView;
 
@@ -47,16 +48,22 @@ public class ActDetails extends Activity {
 		TextView txtOnHand = (TextView) findViewById(R.id.txtvOnHand);
 		TextView txtPrice = (TextView) findViewById(R.id.txtvPrice);
 		
-		txtArtist.append(prod.getArtist()) ; txtTitle.append(prod.getTitle());
-		lblShortDesc.append("Short Description:") ; lblISBN.append("ISBN:");
-		lblFormat.append("Format:") ; lblBinNo.append("Bin Number:");
-		lblOutOfStock.append("Out of Stock:") ; lblOnHand.append("Stock On Hand:");
-		lblPrice.append("Price:");
-		txtShortDesc.append(prod.getShortDescription()) ; txtISBN.append(prod.getBarcode());
-		txtFormat.append(prod.getFormat()) ; txtBinNo.append(prod.getBinNo());
-		txtOutOfStock.append(String.format("%s", prod.getOutOfStock())); 
-		txtOnHand.append(String.format("%s", prod.getOnHand()));
-		txtPrice.append(String.format("£    %s", prod.getDealerPrice()));
+		txtArtist.setText(prod.getArtist()) ; txtTitle.setText(prod.getTitle());
+		lblShortDesc.setText("Short Description:") ; lblISBN.setText("ISBN:");
+		lblFormat.setText("Format:") ; lblBinNo.setText("Bin Number:");
+		lblOutOfStock.setText("Out of Stock:") ; lblOnHand.setText("Stock On Hand:");
+		lblPrice.setText("Price:");
+		txtShortDesc.setText(prod.getShortDescription()) ; txtISBN.setText(prod.getBarcode());
+		txtFormat.setText(prod.getFormat()) ; txtBinNo.setText(prod.getBinNo());
+		txtOutOfStock.setText(String.format("%s", prod.getOutOfStock())); 
+		txtOnHand.setText(String.format("%s", prod.getOnHand()));
+		txtPrice.setText(String.format("£    %s", prod.getDealerPrice()));
+	}
+
+	@Override
+	public void onBackPressed() {
+		this.startActivity(new Intent(ActDetails.this,com.android.barcode.ActMain.class));
+		super.onBackPressed();
 	}
 
 	@Override
