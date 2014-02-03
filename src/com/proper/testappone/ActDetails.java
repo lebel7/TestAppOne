@@ -1,16 +1,25 @@
 package com.proper.testappone;
 
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.WriterException;
+import com.google.zxing.common.BitMatrix;
+import com.google.zxing.oned.Code128Writer;
 import com.proper.testappone.R;
 import com.proper.testappone.data.Product;
 
 import android.os.Bundle;
 import android.app.Activity;
 import android.content.Intent;
+import android.graphics.Bitmap;
+import android.graphics.Bitmap.Config;
+import android.graphics.Color;
 import android.view.Menu;
+import android.widget.ImageView;
 import android.widget.TextView;
 
 public class ActDetails extends Activity {
-
+	private Bitmap mBitmap = null;
+	
 	@Override
 	protected void onCreate(Bundle savedInstanceState) {
 		super.onCreate(savedInstanceState);
@@ -27,6 +36,7 @@ public class ActDetails extends Activity {
 		}
 		//action = extras.getString("ACTION_EXTRA");
 		Product prod = (Product) extras.getSerializable("PRODUCT_EXTRA");
+		String barcode = extras.getString("SCANDATA_EXTRA");
 		
 		//Populate views
 		TextView txtArtist = (TextView) findViewById(R.id.txtv_Artist);
@@ -58,6 +68,34 @@ public class ActDetails extends Activity {
 		txtOutOfStock.setText(String.format("%s", prod.getOutOfStock())); 
 		txtOnHand.setText(String.format("%s", prod.getOnHand()));
 		txtPrice.setText(String.format("£    %s", prod.getDealerPrice()));
+		if (barcode != null && barcode.equalsIgnoreCase("")) {
+			generateBarCode(barcode);
+		}
+		else {
+			ImageView barcodeImage = (ImageView) findViewById(R.id.imgBarcode);
+			barcodeImage.setImageResource(R.drawable.barcode_ean13);
+		}
+	}
+	
+	public void generateBarCode(String data) {
+	    com.google.zxing.Writer c9 = new Code128Writer();
+	    try {
+	        BitMatrix bm = c9.encode(data,BarcodeFormat.CODE_128,380, 168);
+	        mBitmap = Bitmap.createBitmap(380, 168, Config.ARGB_8888);
+
+	        for (int i = 0; i < 380; i++) {
+	            for (int j = 0; j < 168; j++) {
+
+	                mBitmap.setPixel(i, j, bm.get(i, j) ? Color.BLACK : Color.WHITE);
+	            }
+	        }
+	    } catch (WriterException e) {
+	        e.printStackTrace();
+	    }
+	    if (mBitmap != null) {
+	    	ImageView mImageView = (ImageView) findViewById(R.id.imgBarcode);
+	    	mImageView.setImageBitmap(mBitmap);
+	    }
 	}
 
 	@Override
